@@ -53,4 +53,13 @@ class TaskRepository
     {
         return Task::destroy($id);
     }
+
+    public function assignUser($taskId, $userId)
+{
+    $task = Task::findOrFail($taskId);
+    $task->assignee_id = $userId;
+    $task->save();
+    return $task->load('project', 'assignee');
+}
+
 }

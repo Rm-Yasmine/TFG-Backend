@@ -42,4 +42,10 @@ class TaskService
     {
         return $this->taskRepo->delete($id);
     }
+    
+    public function assignUser($taskId, $userId)
+    {
+        return $this->taskRepo->assignUser($taskId, $userId);
+    }
+
 }
