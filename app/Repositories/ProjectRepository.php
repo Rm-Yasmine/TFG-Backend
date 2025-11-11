@@ -3,20 +3,31 @@
 namespace App\Repositories;
 
 use App\Models\Project;
+use Illuminate\Support\Facades\DB;
 
 class ProjectRepository
 {
-    public function getByUser($userId)
+    public function getOwnProjects($userId)
     {
-        return Project::with(['owner', 'members', 'tasks'])
+        return Project::with(['owner', 'members', 'tasks.assignee'])
             ->where('owner_id', $userId)
-            ->orWhereHas('members', fn($q) => $q->where('user_id', $userId))
+            ->get();
+    }
+
+    public function getCollaborationProjects($userId)
+    {
+        return Project::with(['owner', 'members', 'tasks.assignee'])
+            ->whereHas('tasks', function ($q) use ($userId) {
+                $q->where('assignee_id', $userId);
+            })
+            ->where('owner_id', '!=', $userId)
             ->get();
     }
 
     public function find($id)
     {
-        return Project::with(['owner', 'members', 'tasks'])->findOrFail($id);
+        return Project::with(['owner', 'members', 'tasks.assignee'])
+            ->findOrFail($id);
     }
 
     public function create(array $data)
