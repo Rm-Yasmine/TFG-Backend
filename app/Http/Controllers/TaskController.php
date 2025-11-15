@@ -16,16 +16,16 @@ class TaskController extends Controller
         $this->service = $service;
     }
 
-    // index() → listar tareas (por usuario, proyecto, estado)
-    public function index(Request $request)
+    // tareas() → listar tareas (por usuario, proyecto, estado)
+    public function tareas(Request $request)
     {
         $filters = $request->only(['assignee_id', 'project_id', 'status']);
         $tasks = $this->service->list($filters);
         return ApiResponse::success($tasks, 'Tasks loaded successfully');
     }
 
-    // store() → crear tarea
-    public function store(Request $request)
+    // addtareas() → crear tarea
+    public function addtareas(Request $request)
     {
         $validated = $request->validate([
             'project_id' => 'required|exists:projects,id',
@@ -41,15 +41,15 @@ class TaskController extends Controller
         return ApiResponse::success($task, 'Task created successfully', Response::HTTP_CREATED);
     }
 
-    // show($id) → ver detalles
-    public function show($id)
+    // showtask($id) → ver detalles
+    public function showtask($id)
     {
         $task = $this->service->getById($id);
         return ApiResponse::success($task, 'Task details loaded');
     }
 
-    // update($id) → actualizar
-    public function update(Request $request, $id)
+    // updatetask($id) → actualizar
+    public function updatetask(Request $request, $id)
     {
         $validated = $request->validate([
             'title' => 'sometimes|string|max:255',
@@ -75,7 +75,7 @@ class TaskController extends Controller
     }
 
     // destroy($id) → eliminar
-    public function destroy($id)
+    public function destroytask($id)
     {
         $this->service->delete($id);
         return ApiResponse::success(null, 'Task deleted successfully');

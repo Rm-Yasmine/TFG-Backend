@@ -16,15 +16,19 @@ class ProjectController extends Controller
         $this->service = $service;
     }
 
-    // index() → listar proyectos (donde soy owner o miembro)
-    public function index(Request $request)
+    /*
+    misproyectos() → listar proyectos del usuario (propios y colaboraciones)
+    */
+    public function misproyectos(Request $request)
     {
         $projects = $this->service->listByUser($request->user()->id);
         return ApiResponse::success($projects, 'Projects loaded successfully');
     }
 
-    // store() → crear nuevo proyecto (con tareas opcional)
-    public function proyectos(Request $request)
+    /* 
+    addproyectos → crear proyecto con tareas iniciales
+    */
+    public function addproyectos(Request $request)
     {
         $validated = $request->validate([
             'title' => 'required|string|max:255',
@@ -39,15 +43,19 @@ class ProjectController extends Controller
         return ApiResponse::success($project, 'Project created successfully', Response::HTTP_CREATED);
     }
 
-    // show($id) → ver detalles con miembros y tareas
-    public function show($id)
+    /*
+    showproyecto($id) → ver detalles del proyecto 
+    */
+    public function showproyecto($id)
     {
         $project = $this->service->getById($id);
         return ApiResponse::success($project, 'Project details loaded');
     }
 
-    // update($id) → editar datos del proyecto
-    public function update(Request $request, $id)
+    /* 
+    updateproyecto($id) → actualizar proyecto
+    */
+    public function updateproyecto(Request $request, $id)
     {
         $validated = $request->validate([
             'title' => 'sometimes|string|max:255',
@@ -60,14 +68,18 @@ class ProjectController extends Controller
         return ApiResponse::success($project, 'Project updated successfully');
     }
 
-    // destroy($id) → eliminar proyecto
-    public function destroy($id)
+    /* 
+    deleteproyecto($id) → eliminar proyecto
+    */
+    public function eliminarproyecto($id)
     {
         $this->service->delete($id);
         return ApiResponse::success(null, 'Project deleted successfully');
     }
 
-    // addMembers($id) → añadir miembros
+    /* 
+    addMembers($id) → agregar miembros al proyecto
+    */
     public function addMembers(Request $request, $id)
     {
         $validated = $request->validate([
