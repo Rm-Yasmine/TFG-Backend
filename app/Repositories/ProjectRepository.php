@@ -53,4 +53,8 @@ class ProjectRepository
         $project->members()->syncWithoutDetaching($userIds);
         return $project->members;
     }
+    public function getByEndDateAsc()
+    {
+        return Project::orderBy('end_date', 'asc')->get();
+    }
 }

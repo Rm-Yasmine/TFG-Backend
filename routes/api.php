@@ -4,6 +4,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\NoteController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\TaskController;
+use App\Http\Controllers\TimeSessionController;
 use Illuminate\Support\Facades\Route;
 
 Route::post('/register', [AuthController::class, 'register']);
@@ -19,6 +20,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/projects', [ProjectController::class, 'addproyectos']);
     Route::post('/projects/{id}/members', [ProjectController::class, 'addMembers']);
     Route::delete('/projects/{id}', [ProjectController::class, 'eliminarproyecto']);
+    Route::get('/projects/sorted-by-end-date', [ProjectController::class, 'sortedByEndDate']);
+
 
 // Rutas de tareas
     Route::get('/tasks', [TaskController::class, 'tareas']);
@@ -36,4 +39,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/notes/{id}', [NoteController::class, 'destroynote']);
     Route::get('/notes/shared', [NoteController::class, 'shared']);
 
+// Rutas de sesiones de tiempo
+    Route::post('/time-sessions/start', [TimeSessionController::class, 'start']);
+    Route::post('/time-sessions/stop', [TimeSessionController::class, 'stop']);
+    Route::get('/time-sessions', [TimeSessionController::class, 'index']);
 });

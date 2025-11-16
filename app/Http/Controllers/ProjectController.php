@@ -90,4 +90,13 @@ class ProjectController extends Controller
         $members = $this->service->addMembers($id, $validated['members']);
         return ApiResponse::success($members, 'Members added successfully');
     }
+
+    /* 
+    proyectosordenados() → listar proyectos ordenados por fecha de finalización ascendente
+    */
+    public function proyectosordenados()
+    {
+        $projects = $this->service->getSortedByEndDate();
+        return ApiResponse::success($projects, 'Projects sorted by end date loaded successfully');  
+    }
 }
