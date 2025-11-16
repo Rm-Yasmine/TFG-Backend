@@ -6,6 +6,8 @@ use App\Services\ProjectService;
 use App\Helpers\ApiResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Auth;
+
 
 class ProjectController extends Controller
 {
@@ -92,11 +94,16 @@ class ProjectController extends Controller
     }
 
     /* 
-    proyectosordenados() → listar proyectos ordenados por fecha de finalización ascendente
+    sortedByEndDate() → listar proyectos ordenados por fecha de finalización ascendente
     */
-    public function proyectosordenados()
+    public function sortedByEndDate()
     {
-        $projects = $this->service->getSortedByEndDate();
-        return ApiResponse::success($projects, 'Projects sorted by end date loaded successfully');  
+        $userId = Auth::id();
+        $projects = $this->service->getSortedByEndDateForUser($userId);
+
+        return response()->json([
+            'status' => 'success',
+            'data' => $projects
+        ]);
     }
 }
