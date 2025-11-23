@@ -29,7 +29,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/tasks/{id}', [TaskController::class, 'showtask']);
     Route::put('/tasks/{id}', [TaskController::class, 'updatetask']);
     Route::patch('/tasks/{id}/status', [TaskController::class, 'updatestatus']);
-    Route::delete('/tasks/{id}', [TaskController::class, 'deletetask']);
+    Route::delete('/tasks/{id}', [TaskController::class, 'destroytask']);
     Route::post('/tasks/{taskId}/assign', [TaskController::class, 'assignUser']);
 
     // Rutas de Notas
