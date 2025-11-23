@@ -28,6 +28,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/tasks', [TaskController::class, 'addtareas']);
     Route::get('/tasks/{id}', [TaskController::class, 'showtask']);
     Route::put('/tasks/{id}', [TaskController::class, 'updatetask']);
+    Route::patch('/tasks/{id}/status', [TaskController::class, 'updatestatus']);
     Route::delete('/tasks/{id}', [TaskController::class, 'deletetask']);
     Route::post('/tasks/{taskId}/assign', [TaskController::class, 'assignUser']);
 
