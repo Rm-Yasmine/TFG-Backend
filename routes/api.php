@@ -19,7 +19,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/projects/sorted-by-end-date', [ProjectController::class, 'sortedByEndDate']);
     Route::get('/projects/{id}', [ProjectController::class, 'showproyecto']);
     Route::post('/projects', [ProjectController::class, 'addproyectos']);
-    Route::post('/projects/{projectId}/members', [ProjectController::class, 'addMembers']);
+    // Route::post('/projects/{projectId}/members', [ProjectController::class, 'addMembers']);
+    Route::post('/projects/{id}/add-member-by-email', [ProjectController::class, 'addMemberByEmail']);
     Route::delete('/projects/{id}', [ProjectController::class, 'eliminarproyecto']);
 
 
