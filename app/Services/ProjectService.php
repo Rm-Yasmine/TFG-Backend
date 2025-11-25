@@ -96,6 +96,7 @@ class ProjectService
         return $this->projectRepo->addMembers($projectId, $userIds);
     }
 
+
     public function getSortedByEndDateForUser($userId)
     {
         return $this->projectRepo->getByEndDateAscForUser($userId);

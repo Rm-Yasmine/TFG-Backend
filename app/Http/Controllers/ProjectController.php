@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Services\ProjectService;
 use App\Helpers\ApiResponse;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
@@ -82,16 +83,22 @@ class ProjectController extends Controller
     /* 
     addMembers($id) → agregar miembros al proyecto
     */
-    public function addMembers(Request $request, $id)
-    {
-        $validated = $request->validate([
-            'members' => 'required|array',
-            'members.*' => 'exists:users,id',
-        ]);
+public function addMembers(Request $request, $id)
+{
+    $validated = $request->validate([
+        'members' => 'required|array',
+        'members.*' => 'email|exists:users,email',
+    ]);
 
-        $members = $this->service->addMembers($id, $validated['members']);
-        return ApiResponse::success($members, 'Members added successfully');
-    }
+    // Convertir correos a IDs
+    $userIds = User::whereIn('email', $validated['members'])
+                ->pluck('id')
+                ->toArray();
+
+    $members = $this->service->addMembers($id, $userIds);
+
+    return ApiResponse::success($members, 'Members added successfully');
+}
 
     /* 
     sortedByEndDate() → listar proyectos ordenados por fecha de finalización ascendente
