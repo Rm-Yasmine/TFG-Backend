@@ -7,30 +7,66 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 use App\Helpers\ApiResponse;
+use App\Models\EmailVerification;
+use Illuminate\Support\Facades\Mail;
+use Carbon\Carbon;
 
 class AuthController extends Controller
 {
+    // public function register(Request $request)
+    // {
+    //     $validated = $request->validate([
+    //         'name' => 'required|string|max:255',
+    //         'email' => 'required|string|email|max:255|unique:users',
+    //         'password' => 'required|string|min:6',
+    //     ]);
+
+    //     $user = User::create([
+    //         'name' => $validated['name'],
+    //         'email' => $validated['email'],
+    //         'password' => Hash::make($validated['password']),
+    //     ]);
+
+    //     $token = $user->createToken('auth_token')->plainTextToken;
+
+    //     return ApiResponse::success([
+    //         'user' => $user,
+    //         'token' => $token,
+    //     ], 'User registered successfully');
+    // }
+
     public function register(Request $request)
-    {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
-            'password' => 'required|string|min:6',
-        ]);
+{
+    $validated = $request->validate([
+        'name' => 'required|string|max:255',
+        'email' => 'required|string|email|max:255|unique:users',
+        'password' => 'required|string|min:6',
+    ]);
 
-        $user = User::create([
-            'name' => $validated['name'],
-            'email' => $validated['email'],
-            'password' => Hash::make($validated['password']),
-        ]);
+    $user = User::create([
+        'name' => $validated['name'],
+        'email' => $validated['email'],
+        'password' => Hash::make($validated['password']),
+    ]);
 
-        $token = $user->createToken('auth_token')->plainTextToken;
+    $code = rand(100000, 999999);
 
-        return ApiResponse::success([
-            'user' => $user,
-            'token' => $token,
-        ], 'User registered successfully');
-    }
+    EmailVerification::create([
+        'user_id' => $user->id,
+        'code' => $code,
+        'expires_at' => Carbon::now()->addMinutes(15)
+    ]);
+
+    Mail::raw("Tu código de verificación es: $code", function ($msg) use ($user) {
+        $msg->to($user->email)
+            ->subject('Código de verificación');
+    });
+
+    return ApiResponse::success([
+        'user' => $user,
+        'message' => 'Cuenta creada, verifica tu email'
+    ], 'User registered successfully');
+}
 
     public function login(Request $request)
     {
