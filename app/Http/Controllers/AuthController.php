@@ -35,38 +35,43 @@ class AuthController extends Controller
     //     ], 'User registered successfully');
     // }
 
-    public function register(Request $request)
-{
-    $validated = $request->validate([
-        'name' => 'required|string|max:255',
-        'email' => 'required|string|email|max:255|unique:users',
-        'password' => 'required|string|min:6',
-    ]);
+  public function register(Request $request)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string',
+            'email' => 'required|email|unique:users',
+            'password' => 'required|string|min:6',
+        ]);
 
-    $user = User::create([
-        'name' => $validated['name'],
-        'email' => $validated['email'],
-        'password' => Hash::make($validated['password']),
-    ]);
+        // Crear usuario NO verificado
+        $user = User::create([
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+            'password' => Hash::make($validated['password']),
+            'email_verified_at' => null,
+        ]);
 
-    $code = rand(100000, 999999);
+        // Generar código de 6 dígitos
+        $code = rand(100000, 999999);
 
-    EmailVerification::create([
-        'user_id' => $user->id,
-        'code' => $code,
-        'expires_at' => Carbon::now()->addMinutes(15)
-    ]);
+        EmailVerification::create([
+            'user_id' => $user->id,
+            'code' => $code,
+            'expires_at' => Carbon::now()->addMinutes(15),
+        ]);
 
-    Mail::raw("Tu código de verificación es: $code", function ($msg) use ($user) {
-        $msg->to($user->email)
-            ->subject('Código de verificación');
-    });
+        // Enviar email
+        Mail::raw("Tu código de verificación es: $code", function ($msg) use ($user) {
+            $msg->to($user->email)
+                ->subject("Código de verificación");
+        });
 
-    return ApiResponse::success([
-        'user' => $user,
-        'message' => 'Cuenta creada, verifica tu email'
-    ], 'User registered successfully');
-}
+        return response()->json([
+            'message' => 'Cuenta creada, verifica tu email.',
+            'email' => $user->email,
+        ], 201);
+    }
+
 
     public function login(Request $request)
     {
