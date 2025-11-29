@@ -1,5 +1,6 @@
 <?php
 
+namespace App\Http\Controllers;
 use App\Http\Controllers\Controller;
 use App\Models\EmailVerification;
 use App\Models\User;
