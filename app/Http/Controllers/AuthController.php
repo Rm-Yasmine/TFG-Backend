@@ -7,7 +7,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 use App\Helpers\ApiResponse;
+use App\Mail\VerificationPinMail;
 use Illuminate\Support\Facades\Mail;
+
 
 
 class AuthController extends Controller
@@ -34,55 +36,58 @@ class AuthController extends Controller
     //     ], 'User registered successfully');
     // }
 
+   
     public function register(Request $request)
-    {
-        $request->validate([
-            'name'     => 'required',
-            'email'    => 'required|email|unique:users',
-            'password' => 'required|min:6'
-        ]);
+{
+    $request->validate([
+        'name' => 'required',
+        'email' => 'required|email|unique:users',
+        'password' => 'required|min:6'
+    ]);
 
-        // Generar pin
-        $code = rand(100000, 999999);
+    $pin = rand(100000, 999999);
 
-        // Crear usuario NO verificado
-        $user = User::create([
-            'name'              => $request->name,
-            'email'             => $request->email,
-            'password'          => Hash::make($request->password),
-            'verification_code' => $code,
-        ]);
+    cache()->put('register_' . $request->email, [
+        'name' => $request->name,
+        'email' => $request->email,
+        'password' => bcrypt($request->password),
+        'pin' => $pin
+    ], now()->addMinutes(10));
 
-        // Enviar email
-        Mail::raw("Tu código de verificación es: $code", function ($message) use ($user) {
-            $message->to($user->email)
-                    ->subject('Código de verificación');
-        });
+    Mail::to($request->email)->send(new VerificationPinMail($pin));
 
-        return response()->json(['message' => 'Usuario creado. Código enviado por email.']);
+    return ApiResponse::success(null, 'Código enviado al correo');
+}
+
+
+public function verifyPin(Request $request)
+{
+    $request->validate([
+        'email' => 'required|email',
+        'pin' => 'required'
+    ]);
+
+    $data = cache()->get('register_' . $request->email);
+
+    if (!$data || $data['pin'] != $request->pin) {
+        return ApiResponse::error('Código incorrecto o expirado', 400);
     }
 
+    $user = User::create([
+        'name' => $data['name'],
+        'email' => $data['email'],
+        'password' => $data['password'],
+    ]);
 
-    public function verifyEmail(Request $request)
-    {
-        $request->validate([
-            'email' => 'required|email',
-            'code'  => 'required'
-        ]);
+    cache()->forget('register_' . $request->email);
 
-        $user = User::where('email', $request->email)->first();
+    $token = $user->createToken('auth_token')->plainTextToken;
 
-        if (!$user || $user->verification_code != $request->code) {
-            return response()->json(['message' => 'Código incorrecto'], 400);
-        }
-
-        $user->email_verified_at = now();
-        $user->verification_code = null;
-        $user->save();
-
-        return response()->json(['message' => 'Correo verificado correctamente']);
-    }
-
+    return ApiResponse::success([
+        'user' => $user,
+        'token' => $token
+    ], 'Usuario verificado y creado correctamente');
+}
 
 
     public function login(Request $request)
