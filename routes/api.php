@@ -5,12 +5,12 @@ use App\Http\Controllers\NoteController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\TaskController;
 use App\Http\Controllers\TimeSessionController;
-use App\Http\Controllers\VerificationController;
 use Illuminate\Support\Facades\Route;
 
 Route::post('/register', [AuthController::class, 'register']);
-Route::post('/verify-pin', [AuthController::class, 'verifyPin']);
 Route::post('/login', [AuthController::class, 'login']);
+Route::post('/password/request', [AuthController::class, 'requestReset']);
+Route::post('/password/reset', [AuthController::class, 'resetPassword']);
 
 
 Route::middleware('auth:sanctum')->group(function () {
