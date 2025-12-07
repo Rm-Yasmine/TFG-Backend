@@ -9,33 +9,71 @@ use Illuminate\Validation\ValidationException;
 use App\Helpers\ApiResponse;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\VerifyCodeMail;
 
 
 
 
 class AuthController extends Controller
 {
+    // public function register(Request $request)
+    // {
+    //     $validated = $request->validate([
+    //         'name' => 'required|string|max:255',
+    //         'email' => 'required|string|email|max:255|unique:users',
+    //         'password' => 'required|string|min:6',
+    //     ]);
+
+    //     $user = User::create([
+    //         'name' => $validated['name'],
+    //         'email' => $validated['email'],
+    //         'password' => Hash::make($validated['password']),
+    //     ]);
+
+    //     $token = $user->createToken('auth_token')->plainTextToken;
+
+    //     return ApiResponse::success([
+    //         'user' => $user,
+    //         'token' => $token,
+    //     ], 'User registered successfully');
+    // }
+
     public function register(Request $request)
-    {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
-            'password' => 'required|string|min:6',
-        ]);
+{
+    $request->validate([
+        'name' => 'required|string|max:255',
+        'email' => 'required|email|unique:users,email',
+        'password' => 'required|min:6'
+    ]);
 
-        $user = User::create([
-            'name' => $validated['name'],
-            'email' => $validated['email'],
-            'password' => Hash::make($validated['password']),
-        ]);
+    // 1️⃣ Crear usuario como NO verificado
+    $user = User::create([
+        'name' => $request->name,
+        'email' => $request->email,
+        'password' => Hash::make($request->password),
+        'email_verified_at' => null,
+    ]);
 
-        $token = $user->createToken('auth_token')->plainTextToken;
+    // 2️⃣ Crear PIN de verificación
+    $code = rand(100000, 999999);
 
-        return ApiResponse::success([
-            'user' => $user,
-            'token' => $token,
-        ], 'User registered successfully');
-    }
+    DB::table('verification_codes')->updateOrInsert(
+        ['email' => $request->email],
+        [
+            'code' => $code,
+            'created_at' => now()
+        ]
+    );
+
+    // 3️⃣ Enviar correo
+    Mail::to($request->email)->send(new VerifyCodeMail($code));
+
+    return response()->json([
+        'status' => 'success',
+        'message' => 'Código enviado al correo'
+    ]);
+}
 
 
     public function login(Request $request)
@@ -73,70 +111,102 @@ class AuthController extends Controller
     }
 
     public function requestReset(Request $request)
-{
-    $request->validate([
-        'email' => 'required|email'
-    ]);
+    {
+        $request->validate([
+            'email' => 'required|email'
+        ]);
 
-    $user = User::where('email', $request->email)->first();
+        $user = User::where('email', $request->email)->first();
 
-    if (!$user) {
-        return response()->json(['status' => 'error', 'message' => 'Email no encontrado'], 404);
+        if (!$user) {
+            return response()->json(['status' => 'error', 'message' => 'Email no encontrado'], 404);
+        }
+
+        $token = Str::random(60);
+
+        DB::table('password_reset_tokens')->updateOrInsert(
+            ['email' => $request->email],
+            [
+                'token' => Hash::make($token),
+                'created_at' => now()
+            ]
+        );
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Email válido, procede al cambio de contraseña',
+            'token' => $token    
+        ]);
     }
 
-    // Crear token
-    $token = Str::random(60);
+    public function resetPassword(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|email',
+            'token' => 'required',
+            'password' => 'required|min:6|confirmed'
+        ]);
 
-    DB::table('password_reset_tokens')->updateOrInsert(
-        ['email' => $request->email],
-        [
-            'token' => Hash::make($token),
-            'created_at' => now()
-        ]
-    );
+        $entry = DB::table('password_reset_tokens')
+            ->where('email', $request->email)
+            ->first();
 
-    // 👉 IMPORTANTE: devolver token al frontend
-    return response()->json([
-        'status' => 'success',
-        'message' => 'Email válido, procede al cambio de contraseña',
-        'token' => $token    // El usuario NO lo ve, solo el frontend
-    ]);
-}
+        if (!$entry) {
+            return response()->json(['status' => 'error', 'message' => 'Token inválido'], 400);
+        }
 
-public function resetPassword(Request $request)
+        if (!Hash::check($request->token, $entry->token)) {
+            return response()->json(['status' => 'error', 'message' => 'Token incorrecto'], 400);
+        }
+
+        $user = User::where('email', $request->email)->first();
+        $user->password = Hash::make($request->password);
+        $user->save();
+
+        DB::table('password_reset_tokens')->where('email', $request->email)->delete();
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Contraseña actualizada correctamente'
+        ]);
+    }
+
+    public function verifyCode(Request $request)
 {
     $request->validate([
         'email' => 'required|email',
-        'token' => 'required',
-        'password' => 'required|min:6|confirmed'
+        'code' => 'required|digits:6'
     ]);
 
-    $entry = DB::table('password_reset_tokens')
+    $record = DB::table('verification_codes')
         ->where('email', $request->email)
+        ->where('code', $request->code)
         ->first();
 
-    if (!$entry) {
-        return response()->json(['status' => 'error', 'message' => 'Token inválido'], 400);
+    if (!$record) {
+        return response()->json([
+            'status' => 'error',
+            'message' => 'Código incorrecto'
+        ], 400);
     }
 
-    // Comparar token
-    if (!Hash::check($request->token, $entry->token)) {
-        return response()->json(['status' => 'error', 'message' => 'Token incorrecto'], 400);
-    }
-
-    // Cambiar contraseña
+    // Verificar usuario
     $user = User::where('email', $request->email)->first();
-    $user->password = Hash::make($request->password);
+    $user->email_verified_at = now();
     $user->save();
 
-    // Borrar token
-    DB::table('password_reset_tokens')->where('email', $request->email)->delete();
+    // Borrar el código para que no se reutilice
+    DB::table('verification_codes')->where('email', $request->email)->delete();
+
+    // Login automático
+    $token = $user->createToken('auth_token')->plainTextToken;
 
     return response()->json([
         'status' => 'success',
-        'message' => 'Contraseña actualizada correctamente'
+        'message' => 'Cuenta verificada',
+        'token' => $token,
+        'user' => $user
     ]);
 }
-
 
 }
