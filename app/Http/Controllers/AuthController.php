@@ -9,38 +9,33 @@ use Illuminate\Validation\ValidationException;
 use App\Helpers\ApiResponse;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
-use App\Http\Requests\RegisterRequest;
-use App\Http\Requests\VerifyCodeRequest;
-use App\Http\Requests\ResendCodeRequest;
-use Illuminate\Support\Facades\Mail;
-use App\Mail\VerifyEmailCode;
 
 
 
 
 class AuthController extends Controller
 {
-    // public function register(Request $request)
-    // {
-    //     $validated = $request->validate([
-    //         'name' => 'required|string|max:255',
-    //         'email' => 'required|string|email|max:255|unique:users',
-    //         'password' => 'required|string|min:6',
-    //     ]);
+    public function register(Request $request)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:users',
+            'password' => 'required|string|min:6',
+        ]);
 
-    //     $user = User::create([
-    //         'name' => $validated['name'],
-    //         'email' => $validated['email'],
-    //         'password' => Hash::make($validated['password']),
-    //     ]);
+        $user = User::create([
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+            'password' => Hash::make($validated['password']),
+        ]);
 
-    //     $token = $user->createToken('auth_token')->plainTextToken;
+        $token = $user->createToken('auth_token')->plainTextToken;
 
-    //     return ApiResponse::success([
-    //         'user' => $user,
-    //         'token' => $token,
-    //     ], 'User registered successfully');
-    // }
+        return ApiResponse::success([
+            'user' => $user,
+            'token' => $token,
+        ], 'User registered successfully');
+    }
 
 
     public function login(Request $request)
@@ -137,63 +132,6 @@ class AuthController extends Controller
             'message' => 'Contraseña actualizada correctamente'
         ]);
     }
-    /* -------------------------------------------
-        EMAIL VERIFICATION
-    ------------------------------------------- */
 
-    public function register(RegisterRequest $request)
-    {
-        $data = $request->validated();
-
-        // Código de verificación
-        $code = rand(100000, 999999);
-
-        $user = User::create([
-            'name' => $data['name'],
-            'email' => $data['email'],
-            'password' => bcrypt($data['password']),
-            'verification_code' => $code
-        ]);
-
-        // Enviar email
-        Mail::to($user->email)->send(new VerifyEmailCode($code));
-
-        return response()->json([
-            'message' => 'Registro correcto. Se envió un código a tu correo.',
-            'email' => $user->email,
-        ]);
-    }
-
-    public function verifyCode(VerifyCodeRequest $request)
-    {
-        $user = User::where('email', $request->email)->first();
-
-        if (!$user) return response()->json(['message' => 'Usuario no existe'], 404);
-
-        if ($user->verification_code != $request->code) {
-            return response()->json(['message' => 'Código incorrecto'], 400);
-        }
-
-        // Verificar
-        $user->verification_code = null;
-        $user->email_verified_at = now();
-        $user->save();
-
-        return response()->json(['message' => 'Cuenta verificada correctamente.']);
-    }
-
-    public function resendCode(ResendCodeRequest $request)
-    {
-        $user = User::where('email', $request->email)->first();
-
-        $code = rand(100000, 999999);
-
-        $user->verification_code = $code;
-        $user->save();
-
-        Mail::to($user->email)->send(new VerifyEmailCode($code));
-
-        return response()->json(['message' => 'Código reenviado.']);
-    }
 
 }
