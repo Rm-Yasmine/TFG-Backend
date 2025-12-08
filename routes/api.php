@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/verify-code', [AuthController::class, 'verifyCode']);
+Route::post('/resend-code', [AuthController::class, 'resendCode']);
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/password/request', [AuthController::class, 'requestReset']);
 Route::post('/password/reset', [AuthController::class, 'resetPassword']);
