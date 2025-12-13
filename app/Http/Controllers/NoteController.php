@@ -15,21 +15,18 @@ class NoteController extends Controller
         $this->noteService = $noteService;
     }
 
-    //  Listar notas del usuario
     public function notes()
     {
         $notes = $this->noteService->listByUser(Auth::id());
         return response()->json(['status' => 'success', 'data' => $notes]);
     }
 
-    //  Listar notas compartidas (is_shared = true)
     public function shared()
     {
         $notes = $this->noteService->listShared();
         return response()->json(['status' => 'success', 'data' => $notes]);
     }
 
-    // Crear nota
     public function addNote(Request $request)
     {
         $validated = $request->validate([
@@ -45,7 +42,6 @@ class NoteController extends Controller
         return response()->json(['status' => 'success', 'data' => $note]);
     }
 
-    //  Actualizar nota
     public function updatenote(Request $request, $id)
     {
         $validated = $request->validate([
@@ -59,7 +55,6 @@ class NoteController extends Controller
         return response()->json(['status' => 'success', 'data' => $note]);
     }
 
-    // Eliminar nota
     public function destroynote($id)
     {
         $this->noteService->delete($id);

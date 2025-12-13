@@ -22,8 +22,9 @@ class Project extends Model
     {
         return $this->hasMany(Task::class);
     }
-    public function messages()
+  
+    public function timeSessions()
     {
-        return $this->hasMany(Message::class);
+        return $this->hasMany(TimeSession::class);
     }
 }

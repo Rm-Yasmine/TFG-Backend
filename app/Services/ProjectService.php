@@ -21,7 +21,6 @@ class ProjectService
         $ownProjects = $this->projectRepo->getOwnProjects($userId);
         $collaborationProjects = $this->projectRepo->getCollaborationProjects($userId);
 
-        // Calcular progreso
         $ownProjects->each(function ($project) use ($userId) {
             $this->calculateProgress($project, $userId);
         });
@@ -53,11 +52,9 @@ class ProjectService
         }
 
         if ($project->owner_id === $userId) {
-            // Dueña: calcula progreso global
             $completed = $tasks->where('status', 'COMPLETED')->count();
             $total = $tasks->count();
         } else {
-            // Colaboradora: solo sus tareas
             $userTasks = $tasks->where('assignee_id', $userId);
             $completed = $userTasks->where('status', 'COMPLETED')->count();
             $total = $userTasks->count();

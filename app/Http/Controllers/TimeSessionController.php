@@ -8,7 +8,6 @@ use Illuminate\Support\Facades\Auth;
 
 class TimeSessionController extends Controller
 {
-    // Iniciar sesión de tiempo
     public function start(Request $request)
     {
         $request->validate([
@@ -24,7 +23,6 @@ class TimeSessionController extends Controller
         return response()->json(['status' => 'success', 'data' => $session]);
     }
 
-    // Detener sesión de tiempo
     public function stop(Request $request)
     {
         $request->validate([
@@ -46,7 +44,6 @@ class TimeSessionController extends Controller
         return response()->json(['status' => 'success', 'data' => $session]);
     }
 
-    // Listar historial de sesiones
     public function index()
     {
         $sessions = TimeSession::with('project')

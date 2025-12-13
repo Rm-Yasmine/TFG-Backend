@@ -20,18 +20,14 @@ class ProjectController extends Controller
         $this->service = $service;
     }
 
-    /*
-    misproyectos() → listar proyectos del usuario (propios y colaboraciones)
-    */
+   
     public function misproyectos(Request $request)
     {
         $projects = $this->service->listByUser($request->user()->id);
         return ApiResponse::success($projects, 'Projects loaded successfully');
     }
 
-    /* 
-    addproyectos → crear proyecto con tareas iniciales
-    */
+    
     public function addproyectos(Request $request)
     {
         $validated = $request->validate([
@@ -47,18 +43,14 @@ class ProjectController extends Controller
         return ApiResponse::success($project, 'Project created successfully', Response::HTTP_CREATED);
     }
 
-    /*
-    showproyecto($id) → ver detalles del proyecto 
-    */
+    
     public function showproyecto($id)
     {
         $project = $this->service->getById($id);
         return ApiResponse::success($project, 'Project details loaded');
     }
 
-    /* 
-    updateproyecto($id) → actualizar proyecto
-    */
+   
     public function updateproyecto(Request $request, $id)
     {
         $validated = $request->validate([
@@ -72,18 +64,14 @@ class ProjectController extends Controller
         return ApiResponse::success($project, 'Project updated successfully');
     }
 
-    /* 
-    deleteproyecto($id) → eliminar proyecto
-    */
+   
     public function eliminarproyecto($id)
     {
         $this->service->delete($id);
         return ApiResponse::success(null, 'Project deleted successfully');
     }
 
-    /* 
-    addMembers($id) → agregar miembros al proyecto
-    */
+   
 public function addMemberByEmail(Request $request, $id)
 {
     $request->validate([
@@ -98,9 +86,7 @@ public function addMemberByEmail(Request $request, $id)
     return ApiResponse::success($project->members, "Member added successfully");
 }
 
-    /* 
-    sortedByEndDate() → listar proyectos ordenados por fecha de finalización ascendente
-    */
+   
     public function sortedByEndDate()
     {
         $userId = Auth::id();

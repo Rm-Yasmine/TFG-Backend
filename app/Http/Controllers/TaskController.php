@@ -16,7 +16,6 @@ class TaskController extends Controller
         $this->service = $service;
     }
 
-    // tareas() → listar tareas (por usuario, proyecto, estado)
     public function tareas(Request $request)
     {
         $filters = $request->only(['assignee_id', 'project_id', 'status']);
@@ -24,7 +23,6 @@ class TaskController extends Controller
         return ApiResponse::success($tasks, 'Tasks loaded successfully');
     }
 
-    // addtareas() → crear tarea
     public function addtareas(Request $request)
     {
         $validated = $request->validate([
@@ -41,14 +39,12 @@ class TaskController extends Controller
         return ApiResponse::success($task, 'Task created successfully', Response::HTTP_CREATED);
     }
 
-    // showtask($id) → ver detalles
     public function showtask($id)
     {
         $task = $this->service->getById($id);
         return ApiResponse::success($task, 'Task details loaded');
     }
 
-    // updatetask($id) → actualizar
     public function updatetask(Request $request, $id)
     {
         $validated = $request->validate([
@@ -63,7 +59,6 @@ class TaskController extends Controller
         return ApiResponse::success($task, 'Task updated successfully');
     }
 
-    // updateStatus($id) → cambiar estado
     public function updateStatus(Request $request, $id)
     {
         $validated = $request->validate([
@@ -74,14 +69,12 @@ class TaskController extends Controller
         return ApiResponse::success($task, 'Task status updated');
     }
 
-    // destroy($id) → eliminar
     public function destroytask($id)
     {
         $this->service->delete($id);
         return ApiResponse::success(null, 'Task deleted successfully');
     }
 
-    // assignUser($taskId, $assignee_id) → asignar usuario
     public function assignUser(Request $request, $taskId)
     {
         $validated = $request->validate([

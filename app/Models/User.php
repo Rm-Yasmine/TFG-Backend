@@ -42,9 +42,7 @@ class User extends Authenticatable
         'password' => 'hashed',
     ];
 
-    /* -------------------------------------------
-        RELATIONS
-    ------------------------------------------- */
+
 
     public function ownedProjects()
     {
