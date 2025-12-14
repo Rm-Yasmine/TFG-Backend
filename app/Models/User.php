@@ -63,4 +63,14 @@ class User extends Authenticatable
     {
         return $this->hasMany(Note::class);
     }
+
+    public function projectMessages()
+    {
+        return $this->hasMany(ProjectMessage::class);
+    }
+
+    public function projectMessageReads()
+    {
+        return $this->hasMany(ProjectMessageRead::class);
+    }       
 }

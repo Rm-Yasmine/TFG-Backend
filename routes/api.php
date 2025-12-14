@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\NoteController;
+use App\Http\Controllers\ProjectChatController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\TaskController;
 use App\Http\Controllers\TimeSessionController;
@@ -48,4 +49,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/time-sessions/start', [TimeSessionController::class, 'start']);
     Route::post('/time-sessions/stop', [TimeSessionController::class, 'stop']);
     Route::get('/time-sessions', [TimeSessionController::class, 'index']);
+
+    // Rutas de chat de proyectos
+     Route::get('/projects/{id}/chat', [ProjectChatController::class, 'index']);
+    Route::post('/projects/{id}/chat', [ProjectChatController::class, 'store']);
+    Route::post('/projects/{id}/chat/read', [ProjectChatController::class, 'markAsRead']);
+    Route::get('/projects/{id}/chat/unread', [ProjectChatController::class, 'unreadCount']);
 });
