@@ -48,7 +48,7 @@ Route::middleware('auth:sanctum')->group(function () {
     // Rutas de sesiones de tiempo
     Route::post('/time-sessions/start', [TimeSessionController::class, 'start']);
     Route::post('/time-sessions/stop', [TimeSessionController::class, 'stop']);
-    Route::get('/time-sessions', [TimeSessionController::class, 'index']);
+    Route::get('/time-sessions', [TimeSessionController::class, 'timesession']);
 
     // Rutas de chat de proyectos
     //  Route::get('/projects/{id}/chat', [ProjectChatController::class, 'index']);
