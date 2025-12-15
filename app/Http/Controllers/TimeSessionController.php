@@ -14,7 +14,6 @@ class TimeSessionController extends Controller
             'project_id' => 'required|exists:projects,id',
         ]);
 
-        // Evitar múltiples sesiones activas
         $active = TimeSession::where('user_id', Auth::id())
             ->whereNull('end_time')
             ->first();
