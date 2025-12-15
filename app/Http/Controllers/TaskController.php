@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\TaskStatus;
 use App\Services\TaskService;
 use App\Helpers\ApiResponse;
 use App\Models\Task;
@@ -53,16 +54,22 @@ class TaskController extends Controller
 
     public function updatetask(Request $request, $id)
     {
+        $task = Task::findOrFail($id);
+
         $validated = $request->validate([
-            'title' => 'sometimes|string|max:255',
+            'title' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'status' => 'in:PENDING,IN_PROGRESS,COMPLETED',
+            'status' => 'required|in:' . implode(',', TaskStatus::values()),
             'assignee_id' => 'nullable|exists:users,id',
             'due_date' => 'nullable|date',
         ]);
 
-        $task = $this->service->update($id, $validated);
-        return ApiResponse::success($task, 'Task updated successfully');
+        $task->update($validated);
+
+        return response()->json([
+            'status' => 'success',
+            'data' => $task
+        ]);
     }
 
     public function updateStatus(Request $request, $id)
