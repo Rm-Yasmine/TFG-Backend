@@ -44,12 +44,5 @@ class TaskService
         return $this->taskRepo->delete($id);
     }
 
-    public function assignUser(int $taskId, ?int $assigneeId)
-    {
-        $task = Task::findOrFail($taskId);
-        $task->assignee_id = $assigneeId;
-        $task->save();
-
-        return $task;
-    }
+   
 }

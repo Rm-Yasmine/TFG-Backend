@@ -35,7 +35,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/tasks/{id}', [TaskController::class, 'updatetask']);
     Route::patch('/tasks/{id}/status', [TaskController::class, 'updatestatus']);
     Route::delete('/tasks/{id}', [TaskController::class, 'destroytask']);
-    Route::post('/tasks/{taskId}/assign', [TaskController::class, 'assignUser']);
+    Route::put('/tasks/{taskId}/assign', [TaskController::class, 'assignUser']);
 
     // Rutas de Notas
     Route::get('/notes', [NoteController::class, 'notes']);

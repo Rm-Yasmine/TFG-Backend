@@ -88,18 +88,17 @@ class TaskController extends Controller
         return ApiResponse::success(null, 'Task deleted successfully');
     }
 
-    public function assignUser(Request $request, Task $task)
+    public function assignUser(Request $request, $taskId)
     {
         $validated = $request->validate([
             'assignee_id' => 'nullable|exists:users,id',
         ]);
 
-        $task->assignee_id = $validated['assignee_id'] ?? null;
+        $task = Task::findOrFail($taskId);
+
+        $task->assignee_id = $validated['assignee_id'];
         $task->save();
 
-        return response()->json([
-            'status' => 'success',
-            'data' => $task
-        ]);
+        return ApiResponse::success($task, 'Usuario asignado correctamente');
     }
 }
