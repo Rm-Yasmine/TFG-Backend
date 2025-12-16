@@ -91,10 +91,17 @@ class TaskController extends Controller
     public function assignUser(Request $request, $taskId)
     {
         $validated = $request->validate([
-            'assignee_id' => 'required|exists:users,id',
+            'assignee_id' => 'nullable|exists:users,id',
         ]);
 
-        $task = $this->service->assignUser($taskId, $validated['assignee_id']);
-        return ApiResponse::success($task, 'User assigned to task successfully');
+        $task = $this->service->assignUser(
+            $taskId,
+            $validated['assignee_id'] ?? null
+        );
+
+        return ApiResponse::success(
+            $task,
+            'User assigned to task successfully'
+        );
     }
 }
