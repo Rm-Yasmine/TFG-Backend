@@ -20,14 +20,14 @@ class ProjectController extends Controller
         $this->service = $service;
     }
 
-   
+
     public function misproyectos(Request $request)
     {
         $projects = $this->service->listByUser($request->user()->id);
         return ApiResponse::success($projects, 'Projects loaded successfully');
     }
 
-    
+
     public function addproyectos(Request $request)
     {
         $validated = $request->validate([
@@ -43,14 +43,16 @@ class ProjectController extends Controller
         return ApiResponse::success($project, 'Project created successfully', Response::HTTP_CREATED);
     }
 
-    
+
     public function showproyecto($id)
     {
         $project = $this->service->getById($id);
+
         return ApiResponse::success($project, 'Project details loaded');
     }
 
-   
+
+
     public function updateproyecto(Request $request, $id)
     {
         $validated = $request->validate([
@@ -64,29 +66,29 @@ class ProjectController extends Controller
         return ApiResponse::success($project, 'Project updated successfully');
     }
 
-   
+
     public function eliminarproyecto($id)
     {
         $this->service->delete($id);
         return ApiResponse::success(null, 'Project deleted successfully');
     }
 
-   
-public function addMemberByEmail(Request $request, $id)
-{
-    $request->validate([
-        'email' => 'required|email|exists:users,email'
-    ]);
 
-    $user = User::where('email', $request->email)->first();
+    public function addMemberByEmail(Request $request, $id)
+    {
+        $request->validate([
+            'email' => 'required|email|exists:users,email'
+        ]);
 
-    $project = Project::findOrFail($id);
-    $project->members()->syncWithoutDetaching([$user->id]);
+        $user = User::where('email', $request->email)->first();
 
-    return ApiResponse::success($project->members, "Member added successfully");
-}
+        $project = Project::findOrFail($id);
+        $project->members()->syncWithoutDetaching([$user->id]);
 
-   
+        return ApiResponse::success($project->members, "Member added successfully");
+    }
+
+
     public function sortedByEndDate()
     {
         $userId = Auth::id();

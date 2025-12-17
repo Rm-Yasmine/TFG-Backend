@@ -37,10 +37,9 @@ class ProjectService
 
     public function getById($id)
     {
-        $project = $this->projectRepo->find($id);
-        $this->calculateProgress($project, $project->owner_id);
-        return $project;
+        return $this->projectRepo->find($id);
     }
+
 
     protected function calculateProgress($project, $userId)
     {

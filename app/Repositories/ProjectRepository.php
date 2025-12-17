@@ -30,6 +30,7 @@ class ProjectRepository
             ->findOrFail($id);
     }
 
+
     public function create(array $data)
     {
         return Project::create($data);
